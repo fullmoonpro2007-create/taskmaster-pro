@@ -777,6 +777,7 @@
             transition: all 0.3s ease;
             position: relative;
             border: 1px solid var(--border);
+            cursor: pointer;
         }
 
         .task-item::before {
@@ -829,6 +830,13 @@
             transition: all 0.3s ease;
             background: white;
             flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .task-checkbox:hover {
+            border-color: var(--primary);
+            transform: scale(1.1);
         }
 
         .task-checkbox.checked {
@@ -839,6 +847,8 @@
 
         .task-content {
             flex: 1;
+            position: relative;
+            z-index: 1;
         }
 
         .task-content h4 {
@@ -875,6 +885,8 @@
         .task-actions {
             display: flex;
             gap: 8px;
+            position: relative;
+            z-index: 2;
         }
 
         .task-btn {
@@ -1365,10 +1377,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // JavaScript code remains exactly the same as previous version
-        // Only CSS has been upgraded for better visual design
-        // All functionality is preserved
-
         // Authentication and User Management
         class AuthManager {
             constructor() {
@@ -1580,7 +1588,7 @@
             }
         }
 
-        // Task Management System
+        // Task Management System - ĐÃ SỬA LỖI CHECKBOX
         class TaskManager {
             constructor() {
                 this.tasks = [];
@@ -1618,18 +1626,86 @@
                     this.currentSort = e.target.value;
                     this.renderTasks();
                 });
+
+                // FIX: Event delegation cho toàn bộ task list
+                document.getElementById('taskList').addEventListener('click', (e) => {
+                    this.handleTaskClick(e);
+                });
+            }
+
+            // FIX: Xử lý tất cả click events trong task list
+            handleTaskClick(e) {
+                const target = e.target;
+                
+                // Click vào checkbox
+                if (target.classList.contains('task-checkbox') || target.closest('.task-checkbox')) {
+                    const checkbox = target.classList.contains('task-checkbox') ? 
+                                   target : target.closest('.task-checkbox');
+                    const taskItem = checkbox.closest('.task-item');
+                    const taskId = this.getTaskIdFromElement(taskItem);
+                    
+                    if (taskId) {
+                        this.toggleComplete(taskId);
+                        e.stopPropagation();
+                    }
+                    return;
+                }
+
+                // Click vào nút important
+                if (target.classList.contains('important-btn') || target.closest('.important-btn')) {
+                    const btn = target.classList.contains('important-btn') ? 
+                               target : target.closest('.important-btn');
+                    const taskItem = btn.closest('.task-item');
+                    const taskId = this.getTaskIdFromElement(taskItem);
+                    
+                    if (taskId) {
+                        this.toggleImportant(taskId);
+                        e.stopPropagation();
+                    }
+                    return;
+                }
+
+                // Click vào nút delete
+                if (target.classList.contains('delete') || target.closest('.delete')) {
+                    const btn = target.classList.contains('delete') ? 
+                               target : target.closest('.delete');
+                    const taskItem = btn.closest('.task-item');
+                    const taskId = this.getTaskIdFromElement(taskItem);
+                    
+                    if (taskId) {
+                        this.deleteTask(taskId);
+                        e.stopPropagation();
+                    }
+                    return;
+                }
+            }
+
+            // FIX: Lấy task ID từ element
+            getTaskIdFromElement(taskItem) {
+                if (!taskItem) return null;
+                
+                // Tìm data attribute đầu tiên
+                const taskId = taskItem.getAttribute('data-task-id');
+                if (taskId) return parseInt(taskId);
+                
+                // Fallback: tìm task text để match với ID
+                const taskTextElement = taskItem.querySelector('.task-content h4');
+                if (!taskTextElement) return null;
+                
+                const taskText = taskTextElement.textContent;
+                const task = this.tasks.find(t => t.text === taskText);
+                
+                return task ? task.id : null;
             }
 
             setFilter(filter) {
                 this.currentFilter = filter;
                 
-                // Update active nav item
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.classList.remove('active');
                 });
                 document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
                 
-                // Update section title
                 const titles = {
                     'all': 'Tất cả công việc',
                     'today': 'Công việc hôm nay',
@@ -1651,7 +1727,7 @@
                 }
 
                 const task = {
-                    id: Date.now(),
+                    id: Date.now(), // Sử dụng timestamp làm ID duy nhất
                     text: text,
                     completed: false,
                     important: document.getElementById('importantCheckbox').checked,
@@ -1683,6 +1759,7 @@
             }
 
             toggleComplete(id) {
+                console.log('Toggling task:', id);
                 this.tasks = this.tasks.map(task => {
                     if (task.id === id) {
                         return { ...task, completed: !task.completed };
@@ -1709,7 +1786,6 @@
             getFilteredTasks() {
                 let filteredTasks = [...this.tasks];
                 
-                // Apply filter
                 switch (this.currentFilter) {
                     case 'today':
                         const today = new Date().toDateString();
@@ -1726,7 +1802,6 @@
                         break;
                 }
                 
-                // Apply sort
                 switch (this.currentSort) {
                     case 'newest':
                         filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1758,9 +1833,8 @@
                 }
                 
                 taskList.innerHTML = filteredTasks.map(task => `
-                    <div class="task-item ${task.completed ? 'completed' : ''} ${task.important ? 'important' : ''}">
-                        <div class="task-checkbox ${task.completed ? 'checked' : ''}" 
-                             onclick="taskManager.toggleComplete(${task.id})">
+                    <div class="task-item ${task.completed ? 'completed' : ''} ${task.important ? 'important' : ''}" data-task-id="${task.id}">
+                        <div class="task-checkbox ${task.completed ? 'checked' : ''}">
                             ${task.completed ? '<i class="fas fa-check"></i>' : ''}
                         </div>
                         <div class="task-content">
@@ -1771,11 +1845,10 @@
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="task-btn important-btn ${task.important ? 'active' : ''}" 
-                                    onclick="taskManager.toggleImportant(${task.id})">
+                            <button class="task-btn important-btn ${task.important ? 'active' : ''}">
                                 <i class="fas fa-star"></i>
                             </button>
-                            <button class="task-btn delete" onclick="taskManager.deleteTask(${task.id})">
+                            <button class="task-btn delete">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1819,7 +1892,6 @@
                 
                 document.getElementById('totalTasks').textContent = total;
                 
-                // Update progress
                 const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
                 document.getElementById('progressFill').style.width = `${progress}%`;
                 document.getElementById('progressText').textContent = `${progress}% hoàn thành`;
@@ -1859,7 +1931,6 @@
             document.getElementById(formType + 'Form').classList.add('active');
             document.querySelector(`[onclick="showAuthForm('${formType}')"]`).classList.add('active');
             
-            // Update tab slider
             const slider = document.getElementById('tabSlider');
             if (formType === 'register') {
                 slider.classList.add('register');
