@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro - Quản lý công việc thông minh</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #f59e0b;
+            --secondary-dark: #d97706;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1e293b;
+            --dark-2: #334155;
+            --light: #f8fafc;
+            --light-2: #f1f5f9;
+            --gray: #64748b;
+            --gray-light: #cbd5e1;
+            --border: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff" fill-opacity="0.05" points="0,1000 1000,0 1000,1000"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite linear;
+        }
+
+        .shape-1 { width: 200px; height: 200px; top: 10%; left: 5%; animation-delay: 0s; }
+        .shape-2 { width: 150px; height: 150px; top: 60%; right: 10%; animation-delay: -5s; }
+        .shape-3 { width: 100px; height: 100px; bottom: 20%; left: 20%; animation-delay: -10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(0px) rotate(180deg); }
+            75% { transform: translateY(20px) rotate(270deg); }
+        }
+
+        /* Auth Styles */
+        .auth-container {
+            max-width: 440px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            padding: 50px 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .auth-form {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 40px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--light-2);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--gray);
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+        }
+
+        .auth-tab-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            height: calc(100% - 4px);
+            width: calc(50% - 2px);
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            z-index: 0;
+        }
+
+        .auth-tab-slider.register {
+            transform: translateX(100%);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .auth-btn:hover::before {
+            left: 100%;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .demo-account {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--light-2);
+            border-radius: 12px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        /* App Container */
+        .app-container {
+            display: none;
+            min-height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            max-width: 1400px;
+            margin: 0 auto;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo h2 {
+            font-weight: 800;
+            font-size: 1.4em;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar i {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: var(--secondary);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload:hover {
+            transform: scale(1.1);
+        }
+
+        .user-details h3 {
+            font-size: 1.1em;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .user-details p {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-item:hover::before {
+            left: 100%;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(8px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid var(--secondary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .progress-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-card h4 {
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background: var(--light);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: var(--gradient-secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 101, 101, 0.3);
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-left h1 {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-left p {
+            color: var(--gray);
+            font-size: 1.1em;
+        }
+
+        .date-display {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            font-weight: 600;
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2)::before { background: var(--gradient-success); }
+        .stat-card:nth-child(3)::before { background: var(--gradient-warning); }
+        .stat-card:nth-child(4)::before { background: var(--gradient-secondary); }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2) .stat-icon { background: var(--gradient-success); }
+        .stat-card:nth-child(3) .stat-icon { background: var(--gradient-warning); }
+        .stat-card:nth-child(4) .stat-icon { background: var(--gradient-secondary); }
+
+        .stat-info h3 {
+            font-size: 1.8em;
+            font-weight: 800;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .stat-info p {
+            color: var(--gray);
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* Add Task Card */
+        .add-task-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .add-task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        #taskInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .add-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 16px 25px;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .task-options {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .option-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        #categorySelect {
+            padding: 10px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        #categorySelect:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Task List */
+        .task-list-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .task-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border);
+            background: var(--light-2);
+        }
+
+        .task-list-header h3 {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.2em;
+        }
+
+        #sortSelect {
+            padding: 10px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            font-weight: 500;
+        }
+
+        .task-list {
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--light);
+            margin-bottom: 12px;
+            border-radius: 14px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .task-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, transparent 100%);
+            border-radius: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .task-item:hover::before {
+            opacity: 1;
+        }
+
+        .task-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .task-item.important {
+            border-left-color: var(--danger);
+            background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+        }
+
+        .task-item.completed {
+            opacity: 0.8;
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, #f0fdf4 0%, #fff 100%);
+        }
+
+        .task-item.completed .task-content h4 {
+            text-decoration: line-through;
+            color: var(--gray);
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--gray-light);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-content h4 {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--dark);
+            font-size: 1em;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8em;
+            color: var(--gray);
+        }
+
+        .task-category {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .task-item.important .task-category {
+            background: var(--danger);
+        }
+
+        .task-item.completed .task-category {
+            background: var(--success);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-btn:hover {
+            background: var(--light-2);
+            color: var(--dark);
+            transform: scale(1.1);
+        }
+
+        .task-btn.delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .task-btn.important-btn.active {
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: var(--dark-2);
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .profile-modal.active {
+            display: flex;
+        }
+
+        .profile-content {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .profile-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 24px 24px 0 0;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-header h2 {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.5em;
+        }
+
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar .avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            font-size: 3em;
+            border: 4px solid var(--primary-light);
+        }
+
+        .avatar-upload-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--success);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .task-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .auth-container {
+                margin: 20px auto;
+                padding: 30px 20px;
+            }
+            
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-content {
+                padding: 30px 20px;
+            }
+            
+            .auth-container {
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Authentication Section -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-tabs">
+            <div class="auth-tab-slider" id="tabSlider"></div>
+            <div class="auth-tab active" onclick="showAuthForm('login')">Đăng nhập</div>
+            <div class="auth-tab" onclick="showAuthForm('register')">Đăng ký</div>
+        </div>
+
+        <div class="auth-form active" id="loginForm">
+            <h2 style="margin-bottom: 30px; font-weight: 700; color: var(--dark);">Chào mừng trở lại! 👋</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="Nhập email của bạn">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Mật khẩu</label>
+                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu">
+            </div>
+            <button class="auth-btn" onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> Đăng nhập
+            </button>
+            <div class="demo-account">
+                <strong>Tài khoản demo:</strong><br>
+                demo@student.com / 123456
+            </div>
+        </div>
+
+        <div class="auth-form" id="registerForm">
+            <h2 style="margin-bottom: 30px; font-weight: 700; color: var(--dark);">Tạo tài khoản mới 🚀</h2>
+            <div class="form-group">
+                <label for="regName">Họ và tên</label>
+                <input type="text" id="regName" placeholder="Nhập họ và tên">
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Email</label>
+                <input type="email" id="regEmail" placeholder="Nhập email">
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Mật khẩu</label>
+                <input type="password" id="regPassword" placeholder="Tạo mật khẩu">
+            </div>
+            <div class="form-group">
+                <label for="regClass">Lớp</label>
+                <input type="text" id="regClass" placeholder="Nhập lớp học">
+            </div>
+            <div class="form-group">
+                <label for="regStudentId">Mã số sinh viên</label>
+                <input type="text" id="regStudentId" placeholder="Nhập MSSV">
+            </div>
+            <button class="auth-btn" onclick="register()">
+                <i class="fas fa-user-plus"></i> Đăng ký
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">🎯</div>
+                <h2>TaskMaster Pro</h2>
+            </div>
+            
+            <div class="user-info" onclick="showProfileModal()">
+                <div class="avatar" id="userAvatar">
+                    <!-- Avatar will be inserted here by JavaScript -->
+                </div>
+                <div class="user-details">
+                    <h3 id="userName">Người dùng</h3>
+                    <p id="userEmail">email@example.com</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-filter="all">
+                    <i class="fas fa-tasks"></i>
+                    <span>Tất cả công việc</span>
+                </a>
+                <a class="nav-item" data-filter="today">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Hôm nay</span>
+                </a>
+                <a class="nav-item" data-filter="important">
+                    <i class="fas fa-star"></i>
+                    <span>Quan trọng</span>
+                </a>
+                <a class="nav-item" data-filter="completed">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Đã hoàn thành</span>
+                </a>
+            </nav>
+
+            <div class="progress-card">
+                <h4>Tiến độ hôm nay</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">0% hoàn thành</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 id="sectionTitle">Tất cả công việc</h1>
+                    <p id="taskSummary">Bạn có <span id="totalTasks">0</span> công việc</p>
+                </div>
+                <div class="header-actions">
+                    <div class="date-display" id="currentDate"></div>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </button>
+                </div>
+            </header>
+
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statTotal">0</h3>
+                        <p>Tổng công việc</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statCompleted">0</h3>
+                        <p>Đã hoàn thành</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statPending">0</h3>
+                        <p>Đang chờ</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statImportant">0</h3>
+                        <p>Quan trọng</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Task Section -->
+            <div class="add-task-card">
+                <div class="input-group">
+                    <input type="text" id="taskInput" placeholder="Thêm công việc mới...">
+                    <button class="add-btn" id="addTaskBtn">
+                        <i class="fas fa-plus"></i>
+                        Thêm
+                    </button>
+                </div>
+                <div class="task-options">
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="importantCheckbox">
+                        <span class="checkmark"></span>
+                        Quan trọng
+                    </label>
+                    <select id="categorySelect">
+                        <option value="general">Công việc chung</option>
+                        <option value="study">Học tập</option>
+                        <option value="work">Công việc</option>
+                        <option value="personal">Cá nhân</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Task List -->
+            <div class="task-list-container">
+                <div class="task-list-header">
+                    <h3>Danh sách công việc</h3>
+                    <div class="sort-options">
+                        <select id="sortSelect">
+                            <option value="newest">Mới nhất</option>
+                            <option value="oldest">Cũ nhất</option>
+                            <option value="important">Quan trọng</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="taskList" class="task-list">
+                    <!-- Tasks will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-content">
+            <div class="profile-header">
+                <h2>Thông tin cá nhân</h2>
+                <button class="task-btn" onclick="closeProfileModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="profile-avatar">
+                <div class="avatar" id="modalAvatar">
+                    <!-- Modal avatar will be inserted here -->
+                </div>
+                <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                <button class="avatar-upload-btn" onclick="document.getElementById('avatarUpload').click()">
+                    <i class="fas fa-camera"></i> Đổi ảnh đại diện
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="profileName">Họ và tên</label>
+                <input type="text" id="profileName" placeholder="Nhập họ và tên">
+            </div>
+            <div class="form-group">
+                <label for="profileEmail">Email</label>
+                <input type="email" id="profileEmail" placeholder="Nhập email">
+            </div>
+            <div class="form-group">
+                <label for="profileClass">Lớp</label>
+                <input type="text" id="profileClass" placeholder="Nhập lớp học">
+            </div>
+            <div class="form-group">
+                <label for="profileStudentId">Mã số sinh viên</label>
+                <input type="text" id="profileStudentId" placeholder="Nhập MSSV">
+            </div>
+            <div class="form-group">
+                <label for="profilePhone">Số điện thoại</label>
+                <input type="tel" id="profilePhone" placeholder="Nhập số điện thoại">
+            </div>
+
+            <button class="auth-btn" onclick="saveProfile()">
+                <i class="fas fa-save"></i> Lưu thông tin
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // JavaScript code remains exactly the same as previous version
+        // Only CSS has been upgraded for better visual design
+        // All functionality is preserved
+
+        // Authentication and User Management
+        class AuthManager {
+            constructor() {
+                this.currentUser = null;
+                this.users = JSON.parse(localStorage.getItem('users')) || [];
+                this.init();
+            }
+
+            init() {
+                // Check if user is already logged in
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    this.currentUser = JSON.parse(savedUser);
+                    this.showApp();
+                } else {
+                    this.showAuth();
+                }
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Avatar upload
+                document.getElementById('avatarUpload').addEventListener('change', (e) => {
+                    this.handleAvatarUpload(e);
+                });
+            }
+
+            showAuth() {
+                document.getElementById('authContainer').style.display = 'block';
+                document.getElementById('appContainer').style.display = 'none';
+            }
+
+            showApp() {
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'flex';
+                this.updateUserInterface();
+            }
+
+            register() {
+                const name = document.getElementById('regName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const studentClass = document.getElementById('regClass').value.trim();
+                const studentId = document.getElementById('regStudentId').value.trim();
+
+                if (!name || !email || !password || !studentClass || !studentId) {
+                    this.showToast('Vui lòng điền đầy đủ thông tin!', 'error');
+                    return;
+                }
+
+                if (this.users.find(user => user.email === email)) {
+                    this.showToast('Email đã được đăng ký!', 'error');
+                    return;
+                }
+
+                const newUser = {
+                    id: Date.now(),
+                    name,
+                    email,
+                    password,
+                    class: studentClass,
+                    studentId,
+                    phone: '',
+                    avatar: null,
+                    createdAt: new Date().toISOString()
+                };
+
+                this.users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(this.users));
+
+                this.showToast('Đăng ký thành công! Vui lòng đăng nhập.');
+                showAuthForm('login');
+                
+                // Clear form
+                document.getElementById('regName').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regClass').value = '';
+                document.getElementById('regStudentId').value = '';
+            }
+
+            login() {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+
+                const user = this.users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    this.currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    this.showApp();
+                    taskManager.init();
+                    this.showToast(`Chào mừng ${user.name}!`);
+                } else {
+                    this.showToast('Email hoặc mật khẩu không đúng!', 'error');
+                }
+            }
+
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('currentUser');
+                this.showAuth();
+                this.showToast('Đã đăng xuất!');
+            }
+
+            updateUserInterface() {
+                if (!this.currentUser) return;
+
+                document.getElementById('userName').textContent = this.currentUser.name;
+                document.getElementById('userEmail').textContent = this.currentUser.email;
+                document.getElementById('profileName').value = this.currentUser.name;
+                document.getElementById('profileEmail').value = this.currentUser.email;
+                document.getElementById('profileClass').value = this.currentUser.class;
+                document.getElementById('profileStudentId').value = this.currentUser.studentId;
+                document.getElementById('profilePhone').value = this.currentUser.phone;
+
+                // Update avatar
+                this.updateAvatarDisplay();
+            }
+
+            updateAvatarDisplay() {
+                const userAvatar = document.getElementById('userAvatar');
+                const modalAvatar = document.getElementById('modalAvatar');
+                
+                // Clear existing content
+                userAvatar.innerHTML = '';
+                modalAvatar.innerHTML = '';
+                
+                if (this.currentUser.avatar) {
+                    // If user has avatar, show image
+                    userAvatar.innerHTML = `<img src="${this.currentUser.avatar}" alt="Avatar">`;
+                    modalAvatar.innerHTML = `<img src="${this.currentUser.avatar}" alt="Avatar">`;
+                } else {
+                    // If no avatar, show default icon
+                    userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                    modalAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                }
+                
+                // Add upload button to both avatars
+                userAvatar.innerHTML += '<div class="avatar-upload"><i class="fas fa-camera"></i></div>';
+                modalAvatar.innerHTML += '<div class="avatar-upload"><i class="fas fa-camera"></i></div>';
+            }
+
+            handleAvatarUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // Check file size (max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        this.showToast('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 2MB.', 'error');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.currentUser.avatar = e.target.result;
+                        this.saveUserData();
+                        this.updateAvatarDisplay();
+                        this.showToast('Đã cập nhật ảnh đại diện!');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            saveProfile() {
+                if (!this.currentUser) return;
+
+                this.currentUser.name = document.getElementById('profileName').value;
+                this.currentUser.email = document.getElementById('profileEmail').value;
+                this.currentUser.class = document.getElementById('profileClass').value;
+                this.currentUser.studentId = document.getElementById('profileStudentId').value;
+                this.currentUser.phone = document.getElementById('profilePhone').value;
+
+                this.saveUserData();
+                this.updateUserInterface();
+                this.closeProfileModal();
+                this.showToast('Đã cập nhật thông tin!');
+            }
+
+            saveUserData() {
+                // Update current user
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                
+                // Update in users list
+                const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
+                if (userIndex !== -1) {
+                    this.users[userIndex] = this.currentUser;
+                    localStorage.setItem('users', JSON.stringify(this.users));
+                }
+            }
+
+            showProfileModal() {
+                document.getElementById('profileModal').classList.add('active');
+            }
+
+            closeProfileModal() {
+                document.getElementById('profileModal').classList.remove('active');
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Task Management System
+        class TaskManager {
+            constructor() {
+                this.tasks = [];
+                this.currentFilter = 'all';
+                this.currentSort = 'newest';
+            }
+
+            init() {
+                this.tasks = JSON.parse(localStorage.getItem(`tasks_${authManager.currentUser.id}`)) || [];
+                this.setupEventListeners();
+                this.updateDate();
+                this.renderTasks();
+                this.updateStats();
+            }
+
+            setupEventListeners() {
+                // Add task button
+                document.getElementById('addTaskBtn').addEventListener('click', () => this.addTask());
+                
+                // Enter key to add task
+                document.getElementById('taskInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTask();
+                });
+
+                // Filter navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.setFilter(item.dataset.filter);
+                    });
+                });
+
+                // Sort options
+                document.getElementById('sortSelect').addEventListener('change', (e) => {
+                    this.currentSort = e.target.value;
+                    this.renderTasks();
+                });
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+                
+                // Update section title
+                const titles = {
+                    'all': 'Tất cả công việc',
+                    'today': 'Công việc hôm nay',
+                    'important': 'Công việc quan trọng',
+                    'completed': 'Công việc đã hoàn thành'
+                };
+                document.getElementById('sectionTitle').textContent = titles[filter];
+                
+                this.renderTasks();
+            }
+
+            addTask() {
+                const taskInput = document.getElementById('taskInput');
+                const text = taskInput.value.trim();
+                
+                if (!text) {
+                    this.showToast('Vui lòng nhập công việc!', 'error');
+                    return;
+                }
+
+                const task = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    important: document.getElementById('importantCheckbox').checked,
+                    category: document.getElementById('categorySelect').value,
+                    createdAt: new Date().toISOString(),
+                    dueDate: null,
+                    userId: authManager.currentUser.id
+                };
+
+                this.tasks.unshift(task);
+                this.saveTasks();
+                this.renderTasks();
+                this.updateStats();
+                
+                taskInput.value = '';
+                document.getElementById('importantCheckbox').checked = false;
+                
+                this.showToast('Đã thêm công việc mới!');
+            }
+
+            deleteTask(id) {
+                if (confirm('Bạn có chắc muốn xóa công việc này?')) {
+                    this.tasks = this.tasks.filter(task => task.id !== id);
+                    this.saveTasks();
+                    this.renderTasks();
+                    this.updateStats();
+                    this.showToast('Đã xóa công việc!');
+                }
+            }
+
+            toggleComplete(id) {
+                this.tasks = this.tasks.map(task => {
+                    if (task.id === id) {
+                        return { ...task, completed: !task.completed };
+                    }
+                    return task;
+                });
+                this.saveTasks();
+                this.renderTasks();
+                this.updateStats();
+            }
+
+            toggleImportant(id) {
+                this.tasks = this.tasks.map(task => {
+                    if (task.id === id) {
+                        return { ...task, important: !task.important };
+                    }
+                    return task;
+                });
+                this.saveTasks();
+                this.renderTasks();
+                this.updateStats();
+            }
+
+            getFilteredTasks() {
+                let filteredTasks = [...this.tasks];
+                
+                // Apply filter
+                switch (this.currentFilter) {
+                    case 'today':
+                        const today = new Date().toDateString();
+                        filteredTasks = filteredTasks.filter(task => {
+                            const taskDate = new Date(task.createdAt).toDateString();
+                            return taskDate === today;
+                        });
+                        break;
+                    case 'important':
+                        filteredTasks = filteredTasks.filter(task => task.important);
+                        break;
+                    case 'completed':
+                        filteredTasks = filteredTasks.filter(task => task.completed);
+                        break;
+                }
+                
+                // Apply sort
+                switch (this.currentSort) {
+                    case 'newest':
+                        filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                        break;
+                    case 'oldest':
+                        filteredTasks.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                        break;
+                    case 'important':
+                        filteredTasks.sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
+                        break;
+                }
+                
+                return filteredTasks;
+            }
+
+            renderTasks() {
+                const taskList = document.getElementById('taskList');
+                const filteredTasks = this.getFilteredTasks();
+                
+                if (filteredTasks.length === 0) {
+                    taskList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>Không có công việc nào</h3>
+                            <p>Hãy thêm công việc mới để bắt đầu</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                taskList.innerHTML = filteredTasks.map(task => `
+                    <div class="task-item ${task.completed ? 'completed' : ''} ${task.important ? 'important' : ''}">
+                        <div class="task-checkbox ${task.completed ? 'checked' : ''}" 
+                             onclick="taskManager.toggleComplete(${task.id})">
+                            ${task.completed ? '<i class="fas fa-check"></i>' : ''}
+                        </div>
+                        <div class="task-content">
+                            <h4>${task.text}</h4>
+                            <div class="task-meta">
+                                <span class="task-category">${this.getCategoryText(task.category)}</span>
+                                <span>${this.formatDate(task.createdAt)}</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-btn important-btn ${task.important ? 'active' : ''}" 
+                                    onclick="taskManager.toggleImportant(${task.id})">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            <button class="task-btn delete" onclick="taskManager.deleteTask(${task.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            getCategoryText(category) {
+                const categories = {
+                    'general': 'Công việc chung',
+                    'study': 'Học tập',
+                    'work': 'Công việc',
+                    'personal': 'Cá nhân'
+                };
+                return categories[category] || category;
+            }
+
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffTime = Math.abs(now - date);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) return 'Hôm nay';
+                if (diffDays === 1) return 'Hôm qua';
+                if (diffDays < 7) return `${diffDays} ngày trước`;
+                
+                return date.toLocaleDateString('vi-VN');
+            }
+
+            updateStats() {
+                const total = this.tasks.length;
+                const completed = this.tasks.filter(task => task.completed).length;
+                const pending = total - completed;
+                const important = this.tasks.filter(task => task.important).length;
+                
+                document.getElementById('statTotal').textContent = total;
+                document.getElementById('statCompleted').textContent = completed;
+                document.getElementById('statPending').textContent = pending;
+                document.getElementById('statImportant').textContent = important;
+                
+                document.getElementById('totalTasks').textContent = total;
+                
+                // Update progress
+                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = `${progress}% hoàn thành`;
+            }
+
+            updateDate() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('currentDate').textContent = now.toLocaleDateString('vi-VN', options);
+            }
+
+            saveTasks() {
+                localStorage.setItem(`tasks_${authManager.currentUser.id}`, JSON.stringify(this.tasks));
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Global functions
+        function showAuthForm(formType) {
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(formType + 'Form').classList.add('active');
+            document.querySelector(`[onclick="showAuthForm('${formType}')"]`).classList.add('active');
+            
+            // Update tab slider
+            const slider = document.getElementById('tabSlider');
+            if (formType === 'register') {
+                slider.classList.add('register');
+            } else {
+                slider.classList.remove('register');
+            }
+        }
+
+        function register() {
+            authManager.register();
+        }
+
+        function login() {
+            authManager.login();
+        }
+
+        function logout() {
+            authManager.logout();
+        }
+
+        function showProfileModal() {
+            authManager.showProfileModal();
+        }
+
+        function closeProfileModal() {
+            authManager.closeProfileModal();
+        }
+
+        function saveProfile() {
+            authManager.saveProfile();
+        }
+
+        // Initialize the application
+        const authManager = new AuthManager();
+        const taskManager = new TaskManager();
+
+        // Add sample user for demo
+        if (authManager.users.length === 0) {
+            authManager.users.push({
+                id: 1,
+                name: 'Nguyễn Văn A',
+                email: 'demo@student.com',
+                password: '123456',
+                class: 'D25CQCN01-N',
+                studentId: 'N25DCCN000',
+                phone: '0123456789',
+                avatar: null,
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('users', JSON.stringify(authManager.users));
+        }
+    </script>
+</body>
+</html>
