@@ -1,20 +1,48 @@
-# taskmaster-pro
-Ứng dụng quản lý công việc thông minh - Dự án nộp CLB ITMC
-THÔNG TIN DỰ ÁN:
-- Tên: TaskMaster Pro
-- Mô tả: Ứng dụng web quản lý công việc với đầy đủ tính năng
-- Công nghệ: HTML5, CSS3, JavaScript ES6+, Local Storage, Glass Morphism, Gradient, Animations, Font Awesome 6
-- Thời gian thực hiện: 2 tuần rưỡi 
+# 🚀 TaskMaster Pro
 
-TÍNH NĂNG NỔI BẬT:
-✓ Thêm, xóa, quản lý công việc
-✓ Đánh dấu hoàn thành & quan trọng
-✓ Phân loại theo danh mục
-✓ Lọc và sắp xếp công việc
-✓ Thống kê trực quan
-THÔNG TIN CÁ NHÂN:
-- Họ tên: Bùi Chí Vỹ
-- MSSV: N25DCCN085
-- Lớp: D25CQCN01-N
-- Email: n25dccn085@student.ptithcm.edu.vn
-- SĐT: 0835204006
+## 📋 Giới thiệu
+**TaskMaster Pro** là ứng dụng web quản lý công việc toàn diện với giao diện hiện đại, được phát triển bằng HTML, CSS, JavaScript thuần.
+
+> Dự án được tạo để nộp cho Câu lạc bộ ITMC
+
+## Tính năng
+
+# Xác thực Người dùng
+- Đăng ký tài khoản mới
+- Đăng nhập an toàn
+- Quản lý đa người dùng
+
+# Quản lý Profile
+-  Thông tin cá nhân đầy đủ
+-  Upload ảnh đại diện
+- Cập nhật thông tin real-time
+
+# Quản lý Công việc
+- Thêm, sửa, xóa công việc
+- Đánh dấu hoàn thành & quan trọng
+- Phân loại theo danh mục
+- Lọc và sắp xếp
+
+# Dashboard
+-  Thống kê trực quan
+- Thanh tiến độ
+- Responsive design
+
+# Demo Online
+
+ **Truy cập ngay**: 
+
+ **Tài khoản demo**:
+ Email: demo@student.com
+Mật khẩu: 123456
+
+## 🛠 Công nghệ
+
+- **Frontend**: HTML5, CSS3, JavaScript ES6+
+- **Storage**: Local Storage API
+- **Icons**: Font Awesome 6
+- **Fonts**: Google Fonts (Inter)
+- **Design**: Glass Morphism, Gradient, Animations
+
+
+
