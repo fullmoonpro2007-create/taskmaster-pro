@@ -36,7 +36,7 @@
  Email: demo@student.com
 Mật khẩu: 123456
 
-## 🛠 Công nghệ
+## Công nghệ
 
 - **Frontend**: HTML5, CSS3, JavaScript ES6+
 - **Storage**: Local Storage API
